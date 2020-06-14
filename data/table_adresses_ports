@@ -1,0 +1,7 @@
+//elementName address portTCP portUDP 
+DecisionCenter localhost 6789 6794
+PainterRobot1 localhost 6790 6795
+PainterRobot2 localhost 6791 6796
+ShadeChanger localhost 6792 6797
+Conveyor localhost 6793 6798
+ExchangeMonitor localhost 6799 6788
