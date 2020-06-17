@@ -95,11 +95,15 @@ public class NetworkConnections {
 	 * @param elementName  Nom de la machine
 	 * @param dataFileName Chemin vers le fichier texte contenant l'ensemble des
 	 *                     noms, adresses, et ports des machines de la simulation
-	 * @throws IOException            Dans le cas d'un probleme de socket
-	 * @throws InterruptedException   Dans le cas d'une interruption du thread de
-	 *                                lancement du serveur
-	 * @throws ClassNotFoundException Dans le cas ou les objets test envoyes sont de
-	 *                                type inconnu
+	 * @throws IOException            Failed or interrupted I/O operations
+	 * @throws InterruptedException   Thrown when a thread is waiting, sleeping, or
+	 *                                otherwise occupied, and the thread is
+	 *                                interrupted, either before or during the
+	 *                                activity
+	 * @throws ClassNotFoundException Thrown when an application tries to load in a
+	 *                                class through its string name but no
+	 *                                definition for the class with the specified
+	 *                                name could be found
 	 */
 	public NetworkConnections(String elementName, String dataFileName)
 			throws IOException, InterruptedException, ClassNotFoundException {
@@ -178,7 +182,7 @@ public class NetworkConnections {
 	/**
 	 * Fermer toutes les sockets en une seule fois
 	 * 
-	 * @throws IOException Dans le cas ou une erreur de socket survient
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void closeAllConnections() throws IOException {
 		server.close();
@@ -195,8 +199,8 @@ public class NetworkConnections {
 	 * @param dataFileName Correspondant au chemin vers le fichier texte contenant
 	 *                     l'ensemble des noms, adresses, et ports des machines de
 	 *                     la simulation
-	 * @throws FileNotFoundException Dans le cas ou dans le cas ou le fichier texte
-	 *                               est absent ou son nom est errone
+	 * @throws FileNotFoundException Thrown when a file with the specified pathname
+	 *                               does not exist or is inaccessible
 	 */
 	public void getHostsAndPorts(String elementName, String dataFileName) throws FileNotFoundException {
 		String[] mots = null;
@@ -226,8 +230,7 @@ public class NetworkConnections {
 	 * @param elementName Correspondant au nom de la machine destinatrice
 	 * @param object      Correspondant à l'objet que l'on souhaite envoyer à la
 	 *                    machine elementName
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     TCP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendRequest(String elementName, Object object) throws IOException {
 		client.sendObject(elementName, object);
@@ -242,8 +245,7 @@ public class NetworkConnections {
 	 * @param elementName Correspondant au nom de la machine destinatrice
 	 * @param object      Correspondant à l'objet que l'on souhaite envoyer à la
 	 *                    machine elementName
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     TCP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendAnswer(String elementName, Object object) throws IOException {
 		server.sendObject(elementName, object);
@@ -256,10 +258,11 @@ public class NetworkConnections {
 	 * Recevoir depuis le serveur un objet venant de la machine elementName
 	 * 
 	 * @param elementName Correspondant au nom de la machine emettrice
-	 * @throws IOException            Dans le cas ou une erreur à lieu lors de la
-	 *                                communication TCP
-	 * @throws ClassNotFoundException Dans le cas ou le type de l'objet envoye est
-	 *                                inconnu
+	 * @throws IOException            Failed or interrupted I/O operations
+	 * @throws ClassNotFoundException Thrown when an application tries to load in a
+	 *                                class through its string name but no
+	 *                                definition for the class with the specified
+	 *                                name could be found
 	 * @return Retourne l'objet recu
 	 */
 
@@ -271,10 +274,11 @@ public class NetworkConnections {
 	 * Recevoir depuis le client un objet venant de la machine elementName
 	 * 
 	 * @param elementName Correspondant au nom de la machine emettrice
-	 * @throws IOException            Dans le cas ou une erreur à lieu lors de la
-	 *                                communication TCP
-	 * @throws ClassNotFoundException Dans le cas ou le type de l'objet envoye est
-	 *                                inconnu
+	 * @throws IOException            Failed or interrupted I/O operations
+	 * @throws ClassNotFoundException Thrown when an application tries to load in a
+	 *                                class through its string name but no
+	 *                                definition for the class with the specified
+	 *                                name could be found
 	 * @return Retourne l'objet recu
 	 */
 	public Object receiveAnswer(String elementName) throws IOException, ClassNotFoundException {
@@ -286,8 +290,7 @@ public class NetworkConnections {
 	 * 
 	 * @param object Correspondant à l'objet que l'on souhaite envoyer sur les
 	 *               serveurs de toutes les machines
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     TCP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendRequestAll(Object object) throws IOException {
 		for (int idElement = 0; idElement < nbElements; idElement++) {
@@ -300,8 +303,7 @@ public class NetworkConnections {
 	 * 
 	 * @param object Correspondant à l'objet que l'on souhaite envoyer sur les
 	 *               clients de toutes les machines
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     TCP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendAnswerAll(Object object) throws IOException {
 		for (int idElement = 0; idElement < nbElements; idElement++) {
@@ -320,8 +322,7 @@ public class NetworkConnections {
 	 * @param copyToExchangeMonitor Indiquant si une copie de l'echange UDP doit
 	 *                              être envoyee à la machine "ExchangeMonitor"
 	 * 
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     UDP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendUDP(String elementName, Object object, boolean copyToExchangeMonitor) throws IOException {
 		int indexElementInfo = elementNames.indexOf(elementName);
@@ -334,8 +335,8 @@ public class NetworkConnections {
 	/**
 	 * Recevoir un objet en UDP
 	 * 
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     TCP
+	 * @throws IOException Failed or interrupted I/O operations
+	 * 
 	 * @return Retourne l'objet recu
 	 */
 
@@ -348,8 +349,7 @@ public class NetworkConnections {
 	 * 
 	 * @param object Correspondant à l'objet à envoyer à la machine elementName
 	 * 
-	 * @throws IOException Dans le cas ou une erreur à lieu lors de la communication
-	 *                     UDP
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendAllUDP(Object object) throws IOException {
 		for (int idElement = 0; idElement < nbElements; idElement++) {
@@ -362,7 +362,7 @@ public class NetworkConnections {
 	 * 
 	 * @param object Correspondant à l'objet à convertir en un tableau de byte
 	 * 
-	 * @throws IOException Dans le cas ou une erreur d'outpustream à lieu
+	 * @throws IOException Failed or interrupted I/O operations
 	 * 
 	 * @return Retourne le tableau d'octet issu de la conversion de l'objet
 	 */
@@ -380,7 +380,7 @@ public class NetworkConnections {
 	 * 
 	 * @param buffer Correspondant au tableau d'octets à convertir en un objet
 	 * 
-	 * @throws IOException Dans le cas ou une erreur d'inpustream à lieu
+	 * @throws IOException Failed or interrupted I/O operations
 	 * 
 	 * @return Retourne l'objet issu de la conversion du tableau d'octets
 	 */
@@ -405,7 +405,7 @@ public class NetworkConnections {
 	 * 
 	 * @param object   Correspondant à l'echange initial
 	 * 
-	 * @throws IOException Dans le cas ou une erreur de communication UDP à lieu
+	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendCopyToExchangeMonitor(String receiver, Object object) throws IOException {
 		Exchange exchange = new Exchange(myName, receiver, object);

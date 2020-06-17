@@ -43,6 +43,11 @@ public class Conveyor extends Machine {
 	 * Nombre de pieces a peindre
 	 */
 	private int nbIter;
+	/**
+	 * Boolean valant true si la simulation est terminee, permettant d'arreter le
+	 * threadReceiver mettant a jour le colorLevel de la piece en cabine de peinture
+	 */
+	private volatile boolean close;
 
 	/**
 	 * <b>Constructeur de Conveyor</b>
@@ -70,6 +75,7 @@ public class Conveyor extends Machine {
 		conveyorBelt.add(null);
 		conveyorBelt.add(null);
 		nbIter = (int) scenario.get("nbParts");
+		close = false;
 	}
 
 	/**
@@ -99,12 +105,6 @@ public class Conveyor extends Machine {
 
 		sendPartRobots();
 
-		// for (int nbUpdates=10;nbUpdates>0;nbUpdates--) {
-		// Double colorLevel = (Double)
-		// networkConnections.receiveAnswer("PainterRobot1");
-		// conveyorBelt.get(1).setColorLevel(colorLevel);
-		// }
-
 		nbIter -= 1;
 	}
 
@@ -122,6 +122,23 @@ public class Conveyor extends Machine {
 	 *                                activity
 	 */
 	public void actionLoop() throws ClassNotFoundException, IOException, InterruptedException {
+		Thread threadReceiver = new Thread() {
+			public void run() {
+				while (!close) {
+					try {
+						double colorLevel = (double) networkConnections.receiveUDP();
+						if (conveyorBelt.get(1) != null) {
+							conveyorBelt.get(1).setColorLevel(colorLevel);
+						}
+					} catch (IOException e) {
+					}
+
+				}
+			}
+		};
+
+		threadReceiver.start();
+
 		while (nbIter > 0) {
 			receiveAndSetPart();
 
@@ -132,19 +149,17 @@ public class Conveyor extends Machine {
 
 			networkConnections.receiveRequest("PainterRobot1");
 			networkConnections.receiveRequest("PainterRobot2");
-
 			moveConveyorBelt();
 			System.out.println(conveyorBeltToString());
 
 			sendPartRobots();
 
-			/// for (int nbUpdates=10;nbUpdates>0;nbUpdates--) {
-			// Double colorLevel = (Double)
-			/// networkConnections.receiveAnswer("PainterRobot1");
-			// conveyorBelt.get(1).setColorLevel(colorLevel);
-			// }
 			nbIter -= 1;
 		}
+		networkConnections.receiveRequest("PainterRobot1");
+		networkConnections.receiveRequest("PainterRobot2");
+		close = true;
+
 		conveyorBelt.add(2, null);
 		moveConveyorBelt();
 		System.out.println(conveyorBeltToString());

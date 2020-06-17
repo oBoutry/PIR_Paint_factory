@@ -23,12 +23,7 @@ public class PainterRobot extends Machine {
 	private Part part;
 	private Message message;
 	private int nbIter;
-	private int nbUpdates;
-	private int compteurForUpdates;
-	// private int distanceBeetwenRobots;
-
-	// Ajouter fenetre dynamic + petite fenetre quand il reste que peu de pixels
-	// disponibles
+	private int distanceBeetwenRobots;
 	private volatile boolean close;
 	private AtomicInteger messageCounter;
 	private int windowWidth;
@@ -63,9 +58,6 @@ public class PainterRobot extends Machine {
 
 	public void actionLoop() throws InterruptedException, ClassNotFoundException, IOException {
 		while (nbIter > 0) {
-			nbUpdates = 10;
-			compteurForUpdates = 1;
-
 			part = (Part) networkConnections.receiveRequest("Conveyor");
 
 			if (idRobot == 2) {
@@ -84,6 +76,10 @@ public class PainterRobot extends Machine {
 			receivePaint();
 
 			paint();
+
+			while (!close) {
+				Thread.sleep(500);
+			}
 
 			Thread.sleep(Math.round(500 * timeFactor));
 			System.out.println("----> Part painted successfully : " + part);
@@ -106,8 +102,9 @@ public class PainterRobot extends Machine {
 		part.setPixel(position, idRobot);
 		part.setPixel(positionOtherRobot, idOtherRobot);
 		clock.incrementAndGet();
-		//System.out.println(part);
-		part.printMatrice();
+		if (idRobot == 2) {
+			networkConnections.sendUDP("PartVisualizer", part, false);
+		}
 
 		Thread threadReceiver = new Thread() {
 
@@ -117,7 +114,6 @@ public class PainterRobot extends Machine {
 						Message messageReceived = receiveMessage();
 						if (messageReceived.getAck() == 1) {
 							messageCounter.decrementAndGet();
-							//System.out.println("messageCounter - : " + messageCounter.get());
 						} else {
 							analyzeMessage(messageReceived);
 							sendAck(messageReceived);
@@ -136,22 +132,28 @@ public class PainterRobot extends Machine {
 			public void run() {
 				try {
 					while (availablePositions.getSize() >= 1) {
-						while (messageCounter.get() == windowWidth) {
+						while (messageCounter.get() >= windowWidth) {
 							Thread.sleep(10);
 						}
 						messageCounter.incrementAndGet();
-						//System.out.println("messageCounter + : " + messageCounter.get());
 						displacement();
+						getDistanceBetweenRobots();
 					}
 					nextDesiredPosition = null;
 					setMessage(0);
 					sendMessage();
 					while (!isFinishedPart()) {
 						paintPixel();
-						// updateConveyor();
-						move();
-						//System.out.println("clock : " + clock.get());
+						updateConveyor();
+						moveRobots();
+						if (idRobot == 1) {
+							patchPaint();
+						}
+						System.out.println("clock : " + clock.get());
 					}
+					nextDesiredPosition = new Position(0, 0);
+					setMessage(0);
+					sendMessage();
 					close = true;
 				} catch (IOException | InterruptedException e) {
 					e.printStackTrace();
@@ -160,8 +162,13 @@ public class PainterRobot extends Machine {
 				}
 			}
 		};
-		threadActionPaint.run();
 
+		threadActionPaint.start();
+
+	}
+
+	public void getDistanceBetweenRobots() {
+		distanceBeetwenRobots = getDistance(position, positionOtherRobot);
 	}
 
 	public void displacement() throws IOException, InterruptedException {
@@ -177,15 +184,16 @@ public class PainterRobot extends Machine {
 			}
 		}
 		paintPixel();
-		// updateConveyor();
-		move();
-		//System.out.println("clock : " + clock.get());
+		updateConveyor();
+		moveRobots();
+		System.out.println("clock : " + clock.get());
 	}
 
 	public void chooseNextPixel() {
 		OrderByDistance();
 		nextDesiredPosition = availablePositionsOrderedByDistance.remove(0);
 		availablePositions.removeElement(nextDesiredPosition);
+		System.out.println("Next Desired Position : " + nextDesiredPosition);
 	}
 
 	public void analyzeMessage(Message messageReceived) throws InterruptedException {
@@ -196,6 +204,7 @@ public class PainterRobot extends Machine {
 				part.setPixel(oldPosition, 4);
 				availablePositions.removePosition(oldPosition);
 			}
+			part.colorLevelCalculator();
 		} else {
 			clockOtherRobot = messageReceived.getClock();
 
@@ -208,15 +217,28 @@ public class PainterRobot extends Machine {
 
 			positionOtherRobot = messageReceived.getPosition();
 			nextDesiredPositionOtherRobot = messageReceived.getDesiredPosition();
+
 			if (positionOtherRobot != null) {
 				part.setPixel(positionOtherRobot, idOtherRobot);
 				availablePositions.removePosition(positionOtherRobot);
 			}
-			if (idOtherRobot == 1 && nextDesiredPositionOtherRobot != null) {
+
+			if (idRobot == 2 && nextDesiredPositionOtherRobot != null) {
 				availablePositions.removePosition(nextDesiredPositionOtherRobot);
 			}
+
+			if (idRobot == 2 && nextDesiredPositionOtherRobot == null && positionOtherRobot != null) {
+				part.setPixel(positionOtherRobot, 4);
+			}
+
+			part.colorLevelCalculator();
+
+			if (nextDesiredPositionOtherRobot != null && nextDesiredPositionOtherRobot.getRow() == 0
+					&& nextDesiredPositionOtherRobot.getColomn() == 0) {
+				part.setColorLevel(100.);
+			}
 		}
-		part.colorLevelCalculator();
+
 	}
 
 	public void OrderByDistance() {
@@ -228,6 +250,9 @@ public class PainterRobot extends Machine {
 			ArrayList<Position> positions4 = new ArrayList<Position>();
 			ArrayList<Position> positions5Plus = new ArrayList<Position>();
 			for (int idPosition = 0; idPosition < availablePositions.getSize(); idPosition++) {
+				if (positions1.size() >= 1) {
+					break;
+				}
 				Position positionToOrder = availablePositions.getElement(idPosition);
 				int distance = getDistance(position, positionToOrder);
 				switch (distance) {
@@ -259,7 +284,7 @@ public class PainterRobot extends Machine {
 	}
 
 	public boolean isFinishedPart() {
-		return part.getColorLevel() >= 99.9;
+		return part.getColorLevel() == 100;
 	}
 
 	public void paintPixel() throws InterruptedException {
@@ -267,21 +292,16 @@ public class PainterRobot extends Machine {
 			boolean pixelAlreadyPainted = part.getMatrice()[position.getRow()][position.getColomn()] == 4;
 			if (!pixelAlreadyPainted) {
 				part.setPixel(position, 4);
-				tank.setQuantity(tank.getQuantity() - 10);
+				tank.setQuantity(tank.getQuantity() - 1);
 			}
 		}
 		part.colorLevelCalculator();
-		//System.out.println("Tank : " + tank);
+		System.out.println("Tank : " + tank);
 	}
 
 	public void updateConveyor() throws IOException {
 		if (idRobot == 1) {
-			int level = (int) part.getColorLevel();
-			if (level / 10 >= compteurForUpdates && nbUpdates >= 0) {
-				networkConnections.sendAnswer("Conveyor", compteurForUpdates * 10.);
-				nbUpdates -= 1;
-				compteurForUpdates += 1;
-			}
+			networkConnections.sendUDP("Conveyor", part.getColorLevel(), true);
 		}
 	}
 
@@ -304,23 +324,25 @@ public class PainterRobot extends Machine {
 		return messageReceived;
 	}
 
-	public void move() throws InterruptedException {
+	public void moveRobots() throws InterruptedException, IOException {
 		Thread.sleep(Math.round(100 * timeFactor * getDistance(position, nextDesiredPosition)));
 		position = nextDesiredPosition;
 		if (position != null) {
 			part.setPixel(position, idRobot);
 		}
 		clock.incrementAndGet();
-		//System.out.println(part);
-		part.printMatrice();
-		System.out.println("\n");
+		if (idRobot == 2) {
+			networkConnections.sendUDP("PartVisualizer", part, false);
+		}
+		System.out.println("Position : " + position);
+		System.out.println();
 	}
 
 	public boolean areNextMovesAllowed() {
 		if (nextDesiredPosition == null || nextDesiredPositionOtherRobot == null) {
 			return true;
 		}
-		if (getDistance(nextDesiredPosition, nextDesiredPositionOtherRobot) <= 8) {
+		if (getDistance(nextDesiredPosition, nextDesiredPositionOtherRobot) <= windowWidth * 2) {
 			return false;
 		}
 		return true;
@@ -333,6 +355,8 @@ public class PainterRobot extends Machine {
 				availablePositions.addElement(new Position(i, j));
 			}
 		}
+		availablePositions.removePosition(new Position(0, 0));
+		availablePositions.removePosition(new Position(part.getNbRows() - 1, 0));
 	}
 
 	public void sendPaintToBeReused() throws IOException {
@@ -350,12 +374,22 @@ public class PainterRobot extends Machine {
 
 	public int getDistance(Position position1, Position position2) {
 		if (position1 == null || position2 == null) {
-			return 1;
+			return 10;
 		}
 		int distance = 0;
-		distance += Math.abs(position1.getRow() - position2.getRow());
+		distance += 2 * (Math.abs(position1.getRow() - position2.getRow()));
 		distance += Math.abs(position1.getColomn() - position2.getColomn());
 		return distance;
+	}
+
+	public void patchPaint() {
+		for (int i = 0; i < part.getNbRows(); i++) {
+			for (int j = 0; j < part.getMatrice()[i].length; j++) {
+				if (part.getMatrice()[i][j] == 2) {
+					part.setPixel(new Position(i, j), 4);
+				}
+			}
+		}
 	}
 
 	public void sendAck(Message message) throws IOException {

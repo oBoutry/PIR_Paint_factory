@@ -51,8 +51,9 @@ public class ExchangeMonitor extends Machine {
 	}
 
 	/**
-	 * Boucle de fonctionnement : affichage des exchanges passant par le reseau, et
-	 * le nombre d exchanges par seconde
+	 * Boucle de fonctionnement : affichage des exchanges passant par le reseau, le
+	 * nombre d exchanges par seconde, et en fin de simulation le nombre moyen
+	 * d'echanges par seconde, et le nombre maximum d'echanges par seconde
 	 * 
 	 * @throws ClassNotFoundException Thrown when an application tries to load in a
 	 *                                class through its string name but no
@@ -65,7 +66,10 @@ public class ExchangeMonitor extends Machine {
 	 *                                activity
 	 */
 	public void actionLoop() throws InterruptedException, ClassNotFoundException, IOException {
-		int compteur = 0;
+		int averageNbOfExchangesPerSeconds = 0;
+		int ExchangeCompteur = 0;
+		int secondCompteur = 0;
+		int maximumNbOfExchanges = 0;
 		tempsRef = (int) System.currentTimeMillis();
 		while (!endOfSimulation) {
 			Exchange exchange = (Exchange) networkConnections.receiveUDP();
@@ -73,16 +77,24 @@ public class ExchangeMonitor extends Machine {
 				endOfSimulation = true;
 			}
 			System.out.println(exchange.toString());
-			compteur += 1;
+			ExchangeCompteur += 1;
 			int actualTime = (int) System.currentTimeMillis();
 			if (actualTime - tempsRef > 1000) {
-				System.out.println("\n *** # " + compteur + " exchanges in 1 sec *** \n");
+				if (ExchangeCompteur > maximumNbOfExchanges) {
+					maximumNbOfExchanges = ExchangeCompteur;
+				}
+				secondCompteur += 1;
+				System.out.println("\n *** # " + ExchangeCompteur + " exchanges in 1 sec *** \n");
 				tempsRef = (int) System.currentTimeMillis();
-				compteur = 0;
+				averageNbOfExchangesPerSeconds += ExchangeCompteur;
+				ExchangeCompteur = 0;
 			}
 		}
-		System.out.println("\n *** # " + compteur + " exchanges in less than 1 sec *** \n");
-
+		averageNbOfExchangesPerSeconds = averageNbOfExchangesPerSeconds / secondCompteur;
+		System.out.println("\n *** # " + ExchangeCompteur + " exchanges in less than 1 sec *** \n");
+		System.out.println("\n *** # " + averageNbOfExchangesPerSeconds + " exchanges in average every seconds *** \n");
+		System.out.println("\n *** # " + maximumNbOfExchanges
+				+ " maximum number of exchanges in one second during the simulation *** \n");
 	}
 
 }

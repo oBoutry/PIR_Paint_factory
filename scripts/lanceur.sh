@@ -18,6 +18,9 @@ javac partToPaint/*.java
 #compiler exchangeMonitor
 javac exchangeMonitor/*.java
 
+#compiler partVisualizer
+javac partVisualizer/*.java
+
 #compiler painterRobot
 javac painterRobot/*.java
 
@@ -34,11 +37,11 @@ javac decisionCenter/*.java
 xterm -hold -geometry 48x16+300+0  -e 'java conveyor/ConveyorMain' &
 
 #lancer le PainterRobot1
-xterm -hold -geometry 95x30+0+250 -e 'java painterRobot/PainterRobotMain "PainterRobot1"' &
+xterm -hold -geometry 48x20+0+250 -e 'java painterRobot/PainterRobotMain "PainterRobot1"' &
 
  
 #lancer le PainterRobot2
-xterm -hold -geometry 95x30+600+250 -e 'java painterRobot/PainterRobotMain "PainterRobot2"' &
+xterm -hold -geometry 48x20+900+250 -e 'java painterRobot/PainterRobotMain "PainterRobot2"' &
 
 #lancer le DecisionCenter
 xterm -hold -geometry 48x16+0+0  -e 'java decisionCenter/DecisionCenterMain' & 
@@ -48,3 +51,8 @@ xterm -hold  -geometry 48x16+600+0 -e 'java shadeChanger/ShadeChangerMain' &
 
 #lancer le ExchangeMonitor
 xterm -hold -geometry 48x16+900+0 -e 'java exchangeMonitor/ExchangeMonitorMain' &
+
+#lancer le partVizualizer
+xterm -hold -geometry 98x30+300+250 -e 'java partVisualizer/PartVisualizerMain' &
+
+

@@ -148,7 +148,7 @@ public class ShadeChanger extends Machine {
 		String color = part.getColor();
 		int paintQuantity = 0;
 		int tankQuantity = tanks.get(color).getQuantity();
-		paintQuantity1 = part.getNbPixels() * 10;// (part.getFaces().get(1).getNbPixels()+part.getFaces().get(3).getNbPixels())*10;
+		paintQuantity1 = part.getNbPixels();// (part.getFaces().get(1).getNbPixels()+part.getFaces().get(3).getNbPixels())*10;
 		paintQuantity2 = paintQuantity1;
 		// paintQuantity2=(part.getFaces().get(2).getNbPixels()+part.getFaces().get(3).getNbPixels())*10;
 		paintQuantity = paintQuantity1 + paintQuantity2;

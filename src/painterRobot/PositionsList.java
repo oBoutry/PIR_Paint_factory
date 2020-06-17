@@ -37,8 +37,8 @@ public class PositionsList {
 	/**
 	 * Retirer un pixel peind de la liste des positions des pixels disponibles
 	 * 
-	 * @param positionToRemove
-	 * La position a retirer de la liste des positions disponibles
+	 * @param positionToRemove La position a retirer de la liste des positions
+	 *                         disponibles
 	 */
 	public synchronized void removePosition(Position positionToRemove) {
 		positions.removeIf(position -> (position.getRow() == positionToRemove.getRow()

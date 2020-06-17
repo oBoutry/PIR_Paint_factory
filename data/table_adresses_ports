@@ -5,3 +5,4 @@ PainterRobot2 localhost 6791 6796
 ShadeChanger localhost 6792 6797
 Conveyor localhost 6793 6798
 ExchangeMonitor localhost 6799 6788
+PartVisualizer localhost 6787 6786
