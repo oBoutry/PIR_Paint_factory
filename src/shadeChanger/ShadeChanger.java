@@ -97,7 +97,7 @@ public class ShadeChanger extends Machine {
 	}
 
 	/**
-	 * Boucle de fonctionnement de la machine, prepare la peinture, l'envoie, recoit
+	 * Boucle de fonctionnement de la machine : prepare la peinture, l'envoie, recoit
 	 * la peinture en exces, et la restocke, tant qu'il reste des pieces a peindre
 	 * 
 	 * @throws ClassNotFoundException Thrown when an application tries to load in a

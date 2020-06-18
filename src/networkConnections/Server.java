@@ -9,13 +9,49 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
+/**
+ * Server permettant de recevoir des requetes et d'envoyer des reponses a toutes les machines de la simulation
+ * 
+ * @author o.boutry
+ * 
+ */
 public class Server {
 
+	/**
+	 * Sorcket server
+	 */
 	private ServerSocket serverSocket;
+	/**
+	 * Dictionnaire des sockets clients associees au nom de chaque machine
+	 */
 	private Hashtable<String, Socket> clientSockets;
+	/**
+	 * Dictionnaire des outputStreams associees au nom de chaque machine
+	 */
 	private Hashtable<String, ObjectOutputStream> objectOuts;
+	/**
+	 * Dictionnaire des inputStreams associees au nom de chaque machine
+	 */
 	private Hashtable<String, ObjectInputStream> objectIns;
 
+	/**
+	 * <b>Constructeur de server</b>
+	 * 
+	 * Initialise la socket server puis la socket client et les I/O Streams pour chaque machine de la simulation
+	 * 
+	 * @param serverName Le nom de la machine sur laquelle s'initialise le server
+	 * 
+	 * @param port Port TCP de la machine sur laquelle s'initialise le server
+	 * 
+	 * @param nbElements Le nombre de machines de la simulation 
+	 * 
+	 * @throws IOException Failed or interrupted I/O operations
+	 * 
+	 * @throws ClassNotFoundException Thrown when an application tries to load in a
+	 *                                class through its string name but no
+	 *                                definition for the class with the specified
+	 *                                name could be found
+	 */
 	public Server(String serverName, int port, int nbElements) throws IOException, ClassNotFoundException {
 
 		// initialisation Socket server
@@ -54,16 +90,43 @@ public class Server {
 		System.out.println("---> All clients connected successfully");
 	}
 
+	/**
+	 * Envoyer un objet en TCP
+	 * 
+	 * @param clientName Le nom du destinataire
+	 * @param object L'objet a envoyer 
+	 * 
+	 * @throws IOException Failed or interrupted I/O operations
+	 */
 	public void sendObject(String clientName, Object object) throws IOException {
 		objectOuts.get(clientName).writeObject(object);
 		objectOuts.get(clientName).flush();
 	}
 
+	/**
+	 * Recevoir un objet en UDP 
+	 * 
+	 * @param clientName nom de l'emetteur 
+	 * 
+	 * @return L'objet recu 
+	 * 
+	 * @throws ClassNotFoundException Thrown when an application tries to load in a
+	 *                                class through its string name but no
+	 *                                definition for the class with the specified
+	 *                                name could be found
+	 * 
+	 * @throws IOException Failed or interrupted I/O operations
+	 */
 	public Object receiveObject(String clientName) throws ClassNotFoundException, IOException {
 		Object object = objectIns.get(clientName).readObject();
 		return object;
 	}
 
+	/**
+	 * Fermer la socket server 
+	 * 
+	 * @throws IOException Failed or interrupted I/O operations
+	 */
 	public void close() throws IOException {
 		serverSocket.close();
 	}

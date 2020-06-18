@@ -16,6 +16,10 @@ public class Message implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	/**
+	 * L'identifiant de la piece en cabine de peinture
+	 */
+	private int partId;
+	/**
 	 * La position du robot
 	 */
 	private Position position;
@@ -46,7 +50,8 @@ public class Message implements Serializable {
 	 *                            c'est un message normal, si il est a 1 c'est un
 	 *                            accuse de reception
 	 */
-	public Message(Position position, Position nextDesiredPosition, int clock, int ack) {
+	public Message(int partId, Position position, Position nextDesiredPosition, int clock, int ack) {
+		this.partId=partId;
 		this.position = position;
 		this.nextDesiredPosition = nextDesiredPosition;
 		this.clock = clock;
@@ -80,8 +85,13 @@ public class Message implements Serializable {
 	public void setAck(int ack) {
 		this.ack = ack;
 	}
+	
+	public int getPartId() {
+		return partId; 
+	}
 
-	public void setMessage(Position position, Position nextDesiredPosition, int clock, int ack) {
+	public void setMessage(int partId, Position position, Position nextDesiredPosition, int clock, int ack) {
+		this.partId=partId;
 		this.position = position;
 		this.nextDesiredPosition = nextDesiredPosition;
 		this.clock = clock;
@@ -89,7 +99,7 @@ public class Message implements Serializable {
 	}
 
 	public String toString() {
-		return "Message [" + position + "," + nextDesiredPosition + "," + clock + "," + ack + "]";
+		return "Message [" +partId+","+ position + "," + nextDesiredPosition + "," + clock + "," + ack + "]";
 
 	}
 

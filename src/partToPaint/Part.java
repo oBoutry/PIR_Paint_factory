@@ -78,8 +78,10 @@ public class Part implements Serializable {
 			System.out.print("[");
 			for (int j = 0; j < row.length; j++) {
 				System.out.print(row[j]);
+				
 			}
-			System.out.println("]");
+			//System.out.println("]");
+			System.out.println("] "+row.length);
 		}
 	}
 
