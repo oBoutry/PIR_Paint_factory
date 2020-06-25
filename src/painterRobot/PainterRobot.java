@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import machine.Machine;
 import partToPaint.Part;
 import tank.Tank;
+import terminal.Terminal;
 
 /**
  * Machine PainterRobot : recoit la peinture envoyee par le ShadeChanger, peint
@@ -123,7 +124,7 @@ public class PainterRobot extends Machine {
 			idRobot = 2;
 			idOtherRobot = 1;
 		}
-		tank = new Tank("none", 0);
+		tank = new Tank("none", 0, 50); // unit of 50 for larger scale representation
 		clock = new AtomicInteger(0);
 		clockOtherRobot = 0;
 		message = new Message(0, position, null, clock.get(), 0);
@@ -170,7 +171,10 @@ public class PainterRobot extends Machine {
 
 			getAvailablePixels();
 
-			System.out.println("----> Part in position : " + part);
+            Terminal.ClearScreen();
+            Terminal.CursorOff();
+            Terminal.Home();
+			System.out.println("-- Painting " + part);
 			networkConnections.sendRequest("ShadeChanger", "ready");
 
 			receivePaint();
@@ -240,7 +244,7 @@ public class PainterRobot extends Machine {
 								verrou.unlock(); //<--- end of critical section
 								
 							}
-							if (Math.random()>0.8) {
+							if (Math.random()>1.0) {
 								System.out.println("********ack lost during NRT");
 								//nb++;
 								//if (nb==3) {
@@ -292,6 +296,9 @@ public class PainterRobot extends Machine {
 							
 						}
 					}
+                    Terminal.ClearScreen();
+                    Terminal.Home();
+                    System.out.println("-- Painting " + part);
 					nextDesiredPosition = null;
 					setMessage(0);
 					sendMessage();
@@ -348,7 +355,7 @@ public class PainterRobot extends Machine {
 	public void displacement() throws InterruptedException, IOException {
 		chooseNextPixel();
 		setMessage(0);
-		if (Math.random()>0.8) {
+		if (Math.random()>1.0) {
 			System.out.println("******** message lost during NRT");
 			
 		}else {
@@ -524,6 +531,8 @@ public class PainterRobot extends Machine {
 			}
 		}
 		part.colorLevelCalculator();
+        Terminal.Home();
+        System.out.println();
 		System.out.println("Tank : " + tank);
 	}
 
