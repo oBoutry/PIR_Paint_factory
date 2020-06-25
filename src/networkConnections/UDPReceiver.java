@@ -23,16 +23,17 @@ public class UDPReceiver {
 	 * 
 	 * Initialise la socket UDP avec le port UDP de la machine
 	 * 
-	 * @param port Le port UDP de la machine 
+	 * @param port Le port UDP de la machine
 	 * 
-	 * @throws SocketException Thrown to indicate that there is an error creating or accessing a Socket
+	 * @throws SocketException Thrown to indicate that there is an error creating or
+	 *                         accessing a Socket
 	 */
 	public UDPReceiver(int port) throws SocketException {
 		this.socket = new DatagramSocket(port);
 	}
 
 	/**
-	 * Recevoir un datagramme UDP contenant un tableau de bits 
+	 * Recevoir un datagramme UDP contenant un tableau de bits
 	 * 
 	 * @return le tableau de bits recu
 	 * @throws IOException Failed or interrupted I/O operations

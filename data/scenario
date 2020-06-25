@@ -1,4 +1,4 @@
 //nbParts nbMaxPixels nbMinPixels nbRows nbColors timeFactor
-100 80 60 30 5 0.001
+100 60 50 15 5 0.001
 //paint colors
 red blue yellow black pink

@@ -70,7 +70,7 @@ public class Part implements Serializable {
 	}
 
 	/**
-	 * Afficher la matrice de pixels de la pièce
+	 * Afficher la matrice de pixels de la piece
 	 * 
 	 */
 	public void printMatrice() {
@@ -78,10 +78,10 @@ public class Part implements Serializable {
 			System.out.print("[");
 			for (int j = 0; j < row.length; j++) {
 				System.out.print(row[j]);
-				
+
 			}
-			//System.out.println("]");
-			System.out.println("] "+row.length);
+		    System.out.println("]");
+			//System.out.println("] " + row.length);
 		}
 	}
 
@@ -136,9 +136,9 @@ public class Part implements Serializable {
 	}
 
 	/**
-	 * Assigner la valeur value au pixel de la pièce en position position
+	 * Assigner la valeur value au pixel de la piece en position position
 	 * 
-	 * @param position La position du pixel à changer
+	 * @param position La position du pixel a changer
 	 * @param value    La valeur a assigner au pixel cible
 	 * 
 	 */

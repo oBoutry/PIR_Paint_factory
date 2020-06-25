@@ -43,6 +43,7 @@ public class Message implements Serializable {
 	/**
 	 * <b>Constructeur de Message</b>
 	 * 
+	 * @param partId              L'identifiant de la piece en cabine de peinture
 	 * @param position            La position du robot
 	 * @param nextDesiredPosition La position suivante souhaitee du robot
 	 * @param clock               L'horloge du robot
@@ -51,7 +52,7 @@ public class Message implements Serializable {
 	 *                            accuse de reception
 	 */
 	public Message(int partId, Position position, Position nextDesiredPosition, int clock, int ack) {
-		this.partId=partId;
+		this.partId = partId;
 		this.position = position;
 		this.nextDesiredPosition = nextDesiredPosition;
 		this.clock = clock;
@@ -85,13 +86,13 @@ public class Message implements Serializable {
 	public void setAck(int ack) {
 		this.ack = ack;
 	}
-	
+
 	public int getPartId() {
-		return partId; 
+		return partId;
 	}
 
 	public void setMessage(int partId, Position position, Position nextDesiredPosition, int clock, int ack) {
-		this.partId=partId;
+		this.partId = partId;
 		this.position = position;
 		this.nextDesiredPosition = nextDesiredPosition;
 		this.clock = clock;
@@ -99,7 +100,7 @@ public class Message implements Serializable {
 	}
 
 	public String toString() {
-		return "Message [" +partId+","+ position + "," + nextDesiredPosition + "," + clock + "," + ack + "]";
+		return "Message [" + partId + "," + position + "," + nextDesiredPosition + "," + clock + "," + ack + "]";
 
 	}
 

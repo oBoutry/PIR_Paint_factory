@@ -15,18 +15,20 @@ import java.net.UnknownHostException;
  */
 public class UDPSender {
 	/**
-	 * Socket UDP 
+	 * Socket UDP
 	 */
 	private DatagramSocket socket;
-	
+
 	/**
 	 * <b>Constructeur d'UDPSender</b>
 	 * 
 	 * Initialise la socket UDP
 	 * 
-	 * @throws UnknownHostException Thrown to indicate that the IP address of a host could not be determined
+	 * @throws UnknownHostException Thrown to indicate that the IP address of a host
+	 *                              could not be determined
 	 * 
-	 * @throws SocketException Thrown to indicate that there is an error creating or accessing a Socket
+	 * @throws SocketException      Thrown to indicate that there is an error
+	 *                              creating or accessing a Socket
 	 */
 	public UDPSender() throws UnknownHostException, SocketException {
 		super();
@@ -36,10 +38,10 @@ public class UDPSender {
 	/**
 	 * Envoyer un tableau de bits via un datagramme UDP
 	 * 
-	 * @param host l'adresse du destinataire
-	 * @param port le port UDP du destinataire 
+	 * @param host   l'adresse du destinataire
+	 * @param port   le port UDP du destinataire
 	 * @param buffer le tableau de bits a envoyer
-	 *  
+	 * 
 	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void send(String host, int port, byte[] buffer) throws IOException {

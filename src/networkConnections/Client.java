@@ -120,8 +120,8 @@ public class Client {
 	/**
 	 * Envoyer un objet en TCP
 	 * 
-	 * @param serverName Le nom de la machine destinatrice 
-	 * @param object L'objet a envoyer 
+	 * @param serverName Le nom de la machine destinatrice
+	 * @param object     L'objet a envoyer
 	 * @throws IOException Failed or interrupted I/O operations
 	 */
 	public void sendObject(String serverName, Object object) throws IOException {
@@ -141,7 +141,7 @@ public class Client {
 	 *                                definition for the class with the specified
 	 *                                name could be found
 	 * 
-	 * @throws IOException Failed or interrupted I/O operations
+	 * @throws IOException            Failed or interrupted I/O operations
 	 */
 	public Object receiveObject(String serverName) throws ClassNotFoundException, IOException {
 		Object object = objectIns.get(serverName).readObject();

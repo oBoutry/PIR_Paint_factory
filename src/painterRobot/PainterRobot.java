@@ -3,6 +3,8 @@ package painterRobot;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import machine.Machine;
 import partToPaint.Part;
@@ -47,11 +49,11 @@ public class PainterRobot extends Machine {
 	 */
 	private Position positionOtherRobot;
 	/**
-	 * Liste des pixels restant à peindre
+	 * Liste des pixels restant a peindre
 	 */
 	private PositionsList availablePositions;
 	/**
-	 * Liste des pixels restant à peindre ordonnes en fonction de leur distance au
+	 * Liste des pixels restant a peindre ordonnes en fonction de leur distance au
 	 * robot
 	 */
 	private ArrayList<Position> availablePositionsOrderedByDistance;
@@ -93,6 +95,8 @@ public class PainterRobot extends Machine {
 	 */
 	private int windowWidth;
 
+	Lock verrou = new ReentrantLock();
+
 	/**
 	 * <b>Constructeur de PainterRobot</b>
 	 * 
@@ -122,7 +126,7 @@ public class PainterRobot extends Machine {
 		tank = new Tank("none", 0);
 		clock = new AtomicInteger(0);
 		clockOtherRobot = 0;
-		message = new Message(0,position, null, clock.get(), 0);
+		message = new Message(0, position, null, clock.get(), 0);
 		part = null;
 		nextDesiredPosition = null;
 		nbIter = (int) scenario.get("nbParts");
@@ -216,14 +220,35 @@ public class PainterRobot extends Machine {
 		Thread threadReceiver = new Thread() {
 
 			public void run() {
+				//boolean breakdownOccured=false;
+				//int nb=0;
 				while (!close) {
 					try {
 						Message messageReceived = receiveMessage();
 						if (messageReceived.getAck() == 1) {
 							messageCounter.decrementAndGet();
 						} else {
-							analyzeMessage(messageReceived);
-							sendAck(messageReceived);
+							
+							verrou.lock(); //<---- beginning of critical section
+							
+							try {
+
+								analyzeMessage(messageReceived); // action on availablePositions
+
+							} finally {
+								
+								verrou.unlock(); //<--- end of critical section
+								
+							}
+							if (Math.random()>0.8) {
+								System.out.println("********ack lost during NRT");
+								//nb++;
+								//if (nb==3) {
+								//	breakdownOccured=true;
+								//}
+							}else {
+								sendAck(messageReceived);
+							}
 						}
 					} catch (InterruptedException | IOException e) {
 					} finally {
@@ -238,19 +263,35 @@ public class PainterRobot extends Machine {
 
 			public void run() {
 				try {
-					
-					while (availablePositions.getSize() >= 1 && part.getColorLevel()<100) {
-						while (messageCounter.get() >= windowWidth && part.getColorLevel()<100) {
+
+					while (availablePositions.getSize() >= 1 && part.getColorLevel() < 100) { // action on
+						int nbRetry=0;																		// availablePositions
+						while (messageCounter.get() >= windowWidth && part.getColorLevel() < 100) {
+							nbRetry++;
+							if (nbRetry==100) {
+								nbRetry=0;
+								sendMessage();
+							}
 							Thread.sleep(1);
 						}
-						if(availablePositions.getSize() >= 1){
-							messageCounter.incrementAndGet();
-							displacement();
-							setNewWindowWidth();
-							System.out.println("Window Width : " + windowWidth);
+						
+						verrou.lock();//<---- beginning of critical section
+						
+						try {
+							if (availablePositions.getSize() >= 1) { // action on availablePositions
+								messageCounter.incrementAndGet();
+								//Thread.sleep(100);
+								displacement(); // action on availablePositions
+								setNewWindowWidth();
+								System.out.println("Window Width : " + windowWidth);
+								System.out.println("Message sent without ack :" + messageCounter.get());
+							}
+						} finally {
+							
+							verrou.unlock(); //<--- end of critical section
+							
 						}
 					}
-					
 					nextDesiredPosition = null;
 					setMessage(0);
 					sendMessage();
@@ -307,7 +348,12 @@ public class PainterRobot extends Machine {
 	public void displacement() throws InterruptedException, IOException {
 		chooseNextPixel();
 		setMessage(0);
-		sendMessage();
+		if (Math.random()>0.8) {
+			System.out.println("******** message lost during NRT");
+			
+		}else {
+			sendMessage();
+		}
 		if (!areNextMovesAllowed()) {
 			if (idRobot == 2) {
 				if (!nextDesiredPosition.equals(nextDesiredPositionOtherRobot)) {
@@ -330,7 +376,7 @@ public class PainterRobot extends Machine {
 		OrderByDistance();
 		nextDesiredPosition = availablePositionsOrderedByDistance.remove(0);
 		availablePositions.removeElement(nextDesiredPosition);
-	
+
 		System.out.println("Next Desired Position : " + nextDesiredPosition);
 		System.out.println("Position : " + position);
 	}
@@ -348,7 +394,7 @@ public class PainterRobot extends Machine {
 	 *                              activity
 	 */
 	public void analyzeMessage(Message messageReceived) throws InterruptedException {
-		if (messageReceived.getPartId()!=part.getId()) {
+		if (messageReceived.getPartId() != part.getId()) {
 			return;
 		}
 		if (messageReceived.getClock() < clockOtherRobot) {
@@ -405,51 +451,51 @@ public class PainterRobot extends Machine {
 	 * Trier les pixels disponibles en placant les plus proches d'abord
 	 */
 	public void OrderByDistance() {
-			availablePositionsOrderedByDistance.clear();
-			if (position == null) {
-				availablePositionsOrderedByDistance.add(availablePositions.getElement(0));
-			}else {
-				ArrayList<Position> positions1 = new ArrayList<Position>();
-				ArrayList<Position> positions2 = new ArrayList<Position>();
-				ArrayList<Position> positions3 = new ArrayList<Position>();
-				ArrayList<Position> positions4 = new ArrayList<Position>();
-				ArrayList<Position> positions5Plus = new ArrayList<Position>();
-					for (int idPosition = 0; idPosition < availablePositions.getSize(); idPosition++) {
-						if (positions1.size() >= 1) {
-							break;
-						}
-						Position positionToOrder;
-						try {
-							positionToOrder = availablePositions.getElement(idPosition);
-						} catch (Exception e) {
-							positionToOrder=null;
-						}
-						int distance = getDistance(position, positionToOrder);
-						switch (distance) {
-						case 1:
-							positions1.add(positionToOrder);
-							break;
-						case 2:
-							positions2.add(positionToOrder);
-							break;
-						case 3:
-							positions3.add(positionToOrder);
-							break;
-						case 4:
-							positions4.add(positionToOrder);
-							break;
-						default:
-							positions5Plus.add(positionToOrder);
-							break;
-						}
-					}
-
-				availablePositionsOrderedByDistance.addAll(positions1);
-				availablePositionsOrderedByDistance.addAll(positions2);
-				availablePositionsOrderedByDistance.addAll(positions3);
-				availablePositionsOrderedByDistance.addAll(positions4);
-				availablePositionsOrderedByDistance.addAll(positions5Plus);
+		availablePositionsOrderedByDistance.clear();
+		if (position == null) {
+			availablePositionsOrderedByDistance.add(availablePositions.getElement(0));
+		} else {
+			ArrayList<Position> positions1 = new ArrayList<Position>();
+			ArrayList<Position> positions2 = new ArrayList<Position>();
+			ArrayList<Position> positions3 = new ArrayList<Position>();
+			ArrayList<Position> positions4 = new ArrayList<Position>();
+			ArrayList<Position> positions5Plus = new ArrayList<Position>();
+			for (int idPosition = 0; idPosition < availablePositions.getSize(); idPosition++) {
+				if (positions1.size() >= 1) {
+					break;
+				}
+				Position positionToOrder;
+				try {
+					positionToOrder = availablePositions.getElement(idPosition);
+				} catch (Exception e) {
+					positionToOrder = null;
+				}
+				int distance = getDistance(position, positionToOrder);
+				switch (distance) {
+				case 1:
+					positions1.add(positionToOrder);
+					break;
+				case 2:
+					positions2.add(positionToOrder);
+					break;
+				case 3:
+					positions3.add(positionToOrder);
+					break;
+				case 4:
+					positions4.add(positionToOrder);
+					break;
+				default:
+					positions5Plus.add(positionToOrder);
+					break;
+				}
 			}
+
+			availablePositionsOrderedByDistance.addAll(positions1);
+			availablePositionsOrderedByDistance.addAll(positions2);
+			availablePositionsOrderedByDistance.addAll(positions3);
+			availablePositionsOrderedByDistance.addAll(positions4);
+			availablePositionsOrderedByDistance.addAll(positions5Plus);
+		}
 	}
 
 	/**
@@ -508,7 +554,7 @@ public class PainterRobot extends Machine {
 	}
 
 	public void setMessage(int ack) {
-		message.setMessage(part.getId(),position, nextDesiredPosition, clock.get(), ack);
+		message.setMessage(part.getId(), position, nextDesiredPosition, clock.get(), ack);
 	}
 
 	/**
@@ -568,18 +614,18 @@ public class PainterRobot extends Machine {
 	 */
 	public void getAvailablePixels() {
 		availablePositions.clear();
-		if (idRobot==1) {
+		if (idRobot == 1) {
 			for (int i = 0; i < part.getNbRows(); i++) {
 				for (int j = 0; j < part.getMatrice()[i].length; j++) {
 					availablePositions.addElement(new Position(i, j));
 				}
-			}	
-		}else {
-			for (int i = part.getNbRows()-1; i >=0; i--) {
-				for (int j = part.getMatrice()[i].length-1; j>=0; j--) {
+			}
+		} else {
+			for (int i = part.getNbRows() - 1; i >= 0; i--) {
+				for (int j = part.getMatrice()[i].length - 1; j >= 0; j--) {
 					availablePositions.addElement(new Position(i, j));
 				}
-			}	
+			}
 		}
 		availablePositions.removePosition(new Position(0, 0));
 		availablePositions.removePosition(new Position(part.getNbRows() - 1, 0));

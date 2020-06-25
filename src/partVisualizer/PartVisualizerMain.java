@@ -2,7 +2,6 @@ package partVisualizer;
 
 import java.io.IOException;
 
-
 /**
  * Machine PartVisualizer, Main : Initialise la machine, puis permet a la
  * machine d'accomplir ses misssions via la methode actionLoop, avant de fermer

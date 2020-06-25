@@ -10,7 +10,8 @@ import java.io.OutputStream;
 import java.util.Hashtable;
 
 /**
- * Server permettant de recevoir des requetes et d'envoyer des reponses a toutes les machines de la simulation
+ * Server permettant de recevoir des requetes et d'envoyer des reponses a toutes
+ * les machines de la simulation
  * 
  * @author o.boutry
  * 
@@ -37,15 +38,16 @@ public class Server {
 	/**
 	 * <b>Constructeur de server</b>
 	 * 
-	 * Initialise la socket server puis la socket client et les I/O Streams pour chaque machine de la simulation
+	 * Initialise la socket server puis la socket client et les I/O Streams pour
+	 * chaque machine de la simulation
 	 * 
 	 * @param serverName Le nom de la machine sur laquelle s'initialise le server
 	 * 
-	 * @param port Port TCP de la machine sur laquelle s'initialise le server
+	 * @param port       Port TCP de la machine sur laquelle s'initialise le server
 	 * 
-	 * @param nbElements Le nombre de machines de la simulation 
+	 * @param nbElements Le nombre de machines de la simulation
 	 * 
-	 * @throws IOException Failed or interrupted I/O operations
+	 * @throws IOException            Failed or interrupted I/O operations
 	 * 
 	 * @throws ClassNotFoundException Thrown when an application tries to load in a
 	 *                                class through its string name but no
@@ -94,7 +96,7 @@ public class Server {
 	 * Envoyer un objet en TCP
 	 * 
 	 * @param clientName Le nom du destinataire
-	 * @param object L'objet a envoyer 
+	 * @param object     L'objet a envoyer
 	 * 
 	 * @throws IOException Failed or interrupted I/O operations
 	 */
@@ -104,18 +106,18 @@ public class Server {
 	}
 
 	/**
-	 * Recevoir un objet en UDP 
+	 * Recevoir un objet en UDP
 	 * 
-	 * @param clientName nom de l'emetteur 
+	 * @param clientName nom de l'emetteur
 	 * 
-	 * @return L'objet recu 
+	 * @return L'objet recu
 	 * 
 	 * @throws ClassNotFoundException Thrown when an application tries to load in a
 	 *                                class through its string name but no
 	 *                                definition for the class with the specified
 	 *                                name could be found
 	 * 
-	 * @throws IOException Failed or interrupted I/O operations
+	 * @throws IOException            Failed or interrupted I/O operations
 	 */
 	public Object receiveObject(String clientName) throws ClassNotFoundException, IOException {
 		Object object = objectIns.get(clientName).readObject();
@@ -123,7 +125,7 @@ public class Server {
 	}
 
 	/**
-	 * Fermer la socket server 
+	 * Fermer la socket server
 	 * 
 	 * @throws IOException Failed or interrupted I/O operations
 	 */
