@@ -56,8 +56,8 @@ public abstract class Machine {
 	public Machine(String elementName) throws ClassNotFoundException, IOException, InterruptedException {
 		System.out.println("  -- " + elementName + " --  " + "\n");
 		scenario = new Hashtable<String, Object>();
-		getScenario("../data/scenario");
-		networkConnections = new NetworkConnections(elementName, "../data/table_adresses_ports");
+		getScenario("data/scenario");
+		networkConnections = new NetworkConnections(elementName, "data/table_adresses_ports");
 		Thread.sleep(500);
 		networkConnections.setCopyToExchangeMonitorRequired(true);
 	}
