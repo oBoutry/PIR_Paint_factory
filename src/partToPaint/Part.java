@@ -3,6 +3,7 @@ package partToPaint;
 import java.io.Serializable;
 
 import painterRobot.Position;
+import terminal.Terminal;
 
 /**
  * Constitue l'objet part ou "piece a peindre"
@@ -78,10 +79,10 @@ public class Part implements Serializable {
 			System.out.print("[");
 			for (int j = 0; j < row.length; j++) {
 				System.out.print(row[j]);
-
 			}
-		    System.out.println("]");
-			//System.out.println("] " + row.length);
+		    System.out.print("]");
+            Terminal.ClearEndOfLine();
+            System.out.println();
 		}
 	}
 

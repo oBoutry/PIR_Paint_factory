@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import machine.Machine;
 import partToPaint.Part;
+import terminal.Terminal;
 
 /**
  * Machine PartVisualizer : Affiche la matrice correspondant a la piece en
@@ -55,11 +56,12 @@ public class PartVisualizer extends Machine {
 	 *                                activity
 	 */
 	public void actionLoop() throws ClassNotFoundException, IOException, InterruptedException {
+        Terminal.ClearScreen();
 		while (true) {
 			Part part = (Part) networkConnections.receiveUDP();
+            Terminal.Home();
 			System.out.println(part.getPartInfo());
 			part.printMatrice();
-			System.out.println();
 		}
 
 	}

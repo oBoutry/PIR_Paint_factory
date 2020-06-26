@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import machine.Machine;
 import partToPaint.Part;
 import tank.Tank;
+import terminal.Terminal;
 
 /**
  * Machine ShadeChanger : prepare la bonne quantite de peinture de la bonne
@@ -89,11 +90,11 @@ public class ShadeChanger extends Machine {
 	 */
 	public void initialization() throws ClassNotFoundException, IOException, InterruptedException {
 		for (int idColor = 0; idColor < (int) scenario.get("nbColors"); idColor++) {
-			tanks.put((String) scenario.get("color " + idColor), new Tank(10000));
+			tanks.put((String) scenario.get("color " + idColor), new Tank(100000));
 		}
 		tanks.put("preparedPaintTank", preparedPaintTank);
 		tanks.put("paintToBeReusedTank", paintToBeReusedTank);
-		System.out.println(tanks.toString());
+		//System.out.println(tanks.toString());
 	}
 
 	/**
@@ -114,7 +115,12 @@ public class ShadeChanger extends Machine {
 	public void actionLoop() throws ClassNotFoundException, IOException, InterruptedException {
 		while (nbIter > 0) {
 			nextPartToPaint = (Part) networkConnections.receiveRequest("Conveyor");
-			System.out.println("\nPart to paint :" + nextPartToPaint.getPartFullInfo());
+            Terminal.ClearScreen();
+            Terminal.Home();
+            System.out.println("-- Tanks levels :");
+            for (String color:  tanks.keySet())
+                System.out.println(color + "\t" + tanks.get(color));
+			System.out.println("-- Part to paint :" + nextPartToPaint.getPartFullInfo());
 			preparePaint(nextPartToPaint);
 			paintToBeReusedTank.setColor(nextPartToPaint.getColor());
 			networkConnections.receiveRequest("PainterRobot1");
@@ -156,13 +162,13 @@ public class ShadeChanger extends Machine {
 		int timeToPreparePaint = 1 * paintQuantity;
 		if (paintQuantity > tankQuantity) {
 			System.out.println("Error not enough paint for this piece and this color");
+            System.exit(1);
 		} else {
 			Thread.sleep(Math.round(timeToPreparePaint * timeFactor));
 			preparedPaintTank.setQuantity(paintQuantity);
 			preparedPaintTank.setColor(part.getColor());
 			tanks.get(color).setQuantity(tankQuantity - paintQuantity);
 			System.out.println("-- preparedPaintTank : " + preparedPaintTank.toString());
-			System.out.println("Tanks : " + tanks.toString());
 		}
 	}
 
@@ -192,7 +198,6 @@ public class ShadeChanger extends Machine {
 		}
 		preparedPaintTank.setQuantity(0);
 		System.out.println("-- Paint quantity sent : " + quantity);
-		System.out.println("Tanks : " + tanks.toString());
 	}
 
 	/**
@@ -216,7 +221,6 @@ public class ShadeChanger extends Machine {
 		}
 		paintToBeReusedTank.setQuantity(paintFrom1 + paintFrom2);
 		System.out.println("-- Paint quantity received : " + (paintFrom1 + paintFrom2));
-		System.out.println("Tanks : " + tanks.toString());
 
 	}
 
